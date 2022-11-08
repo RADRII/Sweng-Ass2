@@ -29,6 +29,9 @@ jobs:
         uses: docker/setup-buildx-action@v1
         with:
           version: v0.7.0
+
+      - name: Build packages and install them
+        run: ./mvnw clean install -B --no-transfer-progress
           
       - name: Build and push
         id: docker_build
