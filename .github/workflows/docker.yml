@@ -1,9 +1,15 @@
 name: CD to Docker Hub
 
+# on:
+#   create:
+#     tags:
+#       - "v*.*.*"
+
 on:
-  create:
-    tags:
-      - "v*.*.*"
+  push:
+    branches: [ "publish-to-docker" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
