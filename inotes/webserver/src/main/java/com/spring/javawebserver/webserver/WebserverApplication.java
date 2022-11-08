@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -31,135 +32,166 @@ public class WebserverApplication {
 
 }
 
+
+
 @Controller
 class ExpressionController {
     public static boolean valid = true; // to see if the expression is valid
+    public String res="---";
 
     @GetMapping("/")
     public String index(Model model) {
+        model.addAttribute("expression", res);
         return "index";
     }
 
     @PostMapping("/calculate") // when calculate button pressed
-    public String calculation(@RequestParam(required = false) String expression) throws Exception {
+    public String calculation(@RequestParam String description,
+                              @RequestParam(required = false) String expression,
+                              Model model) throws Exception {
 
-        if (expression != null && expression.equals("Calculate!")) { // input is not null
-            String[] tmp = new String[expression.length()];
-            for (int i = 0; i < tmp.length; i++) {
-                tmp[i] = "";
-            }
-            int tmpCounter = 0, charCounter = 0;
-            while (charCounter < expression.length()) {
-                tmp[tmpCounter] = tmp[tmpCounter] + expression.substring(charCounter, charCounter + 1);
-                charCounter++;
-                tmpCounter++;
-                if (charCounter < expression.length()) {
-                    if (expression.charAt(charCounter) >= '0'
-                            && expression.charAt(charCounter) <= '9' && tmp[tmpCounter - 1].matches("[0-9]*")) {
-                        tmpCounter--;
-                    }
-                }
-            }
-
-            solveFunction(tmp);
-            expression = "";
-            for (int i = 0; i < tmp.length; i++) {
-                expression += tmp[i];
-            }
-            return expression;
-        }
+            String[] toEval = splitString(description);
+            String resultStr = result(toEval);
+            model.addAttribute("answer", resultStr);
+            res = resultStr;
+            //return "redirect:/";
 
         return "index";
     }
 
-    public static void solveFunction(String[] expr) {
-        for (int i = 0; i < expr.length; i++) {
-            if (expr[i].contains("*") || expr[i].contains("/")) {
-                operatorFunction(expr, i);
+    public static String[] splitString (String expression) { //takes a string (expression) and splits it into a String array = number, operator, number, operator
+        ArrayList<String> res = new ArrayList<String>();
+        int resIndex = 0;
+        String temp = "";
+        int lastOpIndex = 0;
+        for(int i=0;i<expression.length();i++) {
+            char current = expression.charAt(i);
+            if(i==expression.length()-1) { //last char
+                if(Character.isDigit(current)) {
+                    temp=temp+current; //append to temp
+                    res.add(temp);
+                    resIndex++;
+                }
+                else {
+                    System.err.println("Error: invalid character input detected.");
+                    System.exit(1);
+                }
+            }
+            else if (Character.isDigit(current)) {
+                temp=temp+current; //append digit to temp string
+            }
+            else if (current=='*'||current=='-'||current=='+') { //if operator
+                if (lastOpIndex==(i-1)&&lastOpIndex!=0) { //duplicate check
+                    System.err.println("Error: duplicate operation character input detected.");
+                    System.exit(1);
+                }
+                res.add(temp);
+                resIndex++;
+                temp = "";
+                res.add(Character.toString(current));
+                resIndex++;
+                lastOpIndex = i;
+            }
+            else {
+                System.err.println("Error: invalid input detected.");
+                System.exit(1);
             }
         }
-
-        for (int i = 0; i < expr.length; i++) {
-            if (expr[i].contains("+") || expr[i].contains("-")) {
-                operatorFunction(expr, i);
-            }
-        }
-
-        for (int i = 0; i < expr.length; i++) {
-        }
+        String[] res1=new String[res.size()];
+        res1=res.toArray(res1);
+        return res1;
     }
 
-    public static void operatorFunction(String[] expression, int index) {
-        if (!validation(expression)) {
-            System.out.println("Invalid string entered!");
-            valid = false;
-            return;
-        }
-        String operator = expression[index];
-        int before = -1;
-        for (int i = index - 1; i >= 0; i--) {
-            if (expression[i] != "") {
-                before = i;
-                i = -1;
+    public static String result (String[] splitExpression) {
+        String result = "";
+        boolean complete = false;
+        String[] temp = splitExpression;
+        int idx=0;
+        int num1 = Integer.parseInt(temp[idx]); //first num
+        temp[idx] = null;
+        String nextOperator = "";
+        while (!complete) {
+            int nextNum = 0;
+            boolean mulIsNextOperator = false;
+            int num2 = Integer.parseInt(temp[idx+2]); //second num
+            temp[idx+2] = null;
+            String operator = temp[idx+1];
+            temp[idx+1] = null;
+            //System.out.println("Num1: " + num1 + "num2: " + num2 + "operator: " +operator);
+            int res = num1;
+
+            if(idx<=temp.length-4) {
+
+                nextOperator = temp[idx+3];
+                if (nextOperator.equals("*")) {
+                    mulIsNextOperator = true;
+                    nextNum = Integer.parseInt(temp[idx+4]);
+                }
             }
-        }
-        int after = -1;
-        for (int i = index + 1; i < expression.length; i++) {
-            if (expression[i] != "") {
-                after = i;
-                i = expression.length;
+
+            if (operator.equals("+")) {
+                if(mulIsNextOperator) {
+                    res=Multiplication(num2, nextNum);
+                    //System.out.println("temp result: " + res);
+                    res=Addition(num1, res);
+                    //System.out.println("final add: " + res );
+                    idx+=2;
+                }
+                else {
+                    res=Addition(num1, num2);
+                }
             }
-        }
-
-        if (before >= 0 && after >= 0 && valid) {
-            int numberOne = Integer.parseInt(expression[before]);
-            int numberTwo = Integer.parseInt(expression[after]);
-            String result = "";
-            switch (operator) {
-                case "*":
-                    result = Integer.toString(numberOne * numberTwo);
-                    break;
-
-                case "/":
-                    if (numberTwo == 0) {
-                        valid = false;
-                        System.out.println("My maths teacher says if you divide by zero the world explode!");
-                    }
-                    result = Integer.toString(numberOne / numberTwo);
-                    break;
-
-                case "+":
-                    result = Integer.toString(numberOne + numberTwo);
-                    break;
-
-                case "-":
-                    result = Integer.toString(numberOne - numberTwo);
-                    break;
+            else if (operator.equals("-")) {
+                if(mulIsNextOperator) {
+                    res=Multiplication(num2, nextNum);
+                    //ystem.out.println("temp result: " + res);
+                    res=Subtraction(num1, res);
+                    //System.out.println("final sub: " + res );
+                    idx+=2;
+                }
+                else {
+                    res=Subtraction(num1, num2);
+                }
             }
-            expression[before] = "";
-            expression[after] = "";
-            expression[index] = result;
+            else if (operator.equals("*")) {
+                if(mulIsNextOperator) {
+                    res=Multiplication(num2, nextNum);
+                    //System.out.println("temp result: " + res);
+                    res=Multiplication(num1, res);
+                    //System.out.println("final mul: " + res );
+                    idx+=2;
+                }
+                else{
+                    res=Multiplication(num1, num2);
+                }
+            }
+            else {
+                System.out.println("Invalid input detected.");
+                System.exit(1);
+                //complete = true; //end program
+            }
+            //System.out.println(res);
+            idx+=2;
+            num1=res;
+
+            if (idx==temp.length-1) {
+                //System.out.println("ended loop");
+                complete=true;
+            }
 
         }
+        result = String.valueOf(num1);
+        return result;
     }
 
-    public static boolean validation(String text) {
-
-        if (text.matches("(.*)[^+-_*/](.*)[^0-9][(.*)") || text.matches("[A-Za-z]")) {
-            return false;
-        }
-        return true;
-
+    public static int Addition(int a, int b){
+        return a+b;
     }
-
-    public static boolean validation(String[] string) {
-        String tmp = "";
-        for (int i = 0; i < string.length; i++) {
-            tmp += string[i];
-        }
-        tmp.replace(" ", "");
-
-        return validation(tmp);
+    public static int Subtraction(int a, int b){
+        return a-b;
+    }
+    public static int Multiplication(int a, int b){
+        return a*b;
     }
 
 }
