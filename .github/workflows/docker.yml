@@ -30,8 +30,11 @@ jobs:
         with:
           version: v0.7.0
 
+      - name: Make mvnw executable
+        run: chmod +x mvnw
+
       - name: Build packages and install them
-        run: ./mvnw clean install -B --no-transfer-progress
+        run: ./inotes/webserver/mvnw clean install -B --no-transfer-progress
           
       - name: Build and push
         id: docker_build
