@@ -18,8 +18,16 @@
 </form>
 <ul class="list pl0"><p class="f6 b db mb2">Result</p>
     <li class="mv3 bb bw2 b--light-yellow bg-washed-yellow ph4 pv2"><p class="measure"></p>
-                <p>000</p>
-                <p></p>
+        <#if answer??>
+            <p>${answer}</p>
+            <p></p>
+        <#else>
+            <#if expression??>
+                <p>${expression}</p>
+            <#else>
+                <p>answer null</p>
+            </#if>
+        </#if>
     </li>
 </ul>
 </body>
