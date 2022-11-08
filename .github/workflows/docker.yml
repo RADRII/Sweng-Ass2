@@ -7,7 +7,7 @@ name: CD to Docker Hub
 
 on:
   push:
-    branches: [ "publish-to-docker" ]
+    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
