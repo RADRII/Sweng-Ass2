@@ -1,3 +1,5 @@
+package com.spring.javawebserver.webserver;
+
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -50,11 +52,12 @@ class ExpressionController {
             while (charCounter < expression.length()) {
                 if (expression.length() - charCounter > 5 &&
                         ((expression.substring(charCounter, charCounter + 4).equals("exp(")
-                        || expression.substring(charCounter, charCounter + 4).equals("log(")))) {
+                                || expression.substring(charCounter, charCounter + 4).equals("log(")))) {
                     if (expression.substring(charCounter, charCounter + 4).equals("exp(")) {
                         tmp[tmpCounter] = "exp";
                         charCounter += 3;
-                    } if (expression.substring(charCounter, charCounter + 4).equals("log(")) {
+                    }
+                    if (expression.substring(charCounter, charCounter + 4).equals("log(")) {
                         tmp[tmpCounter] = "log";
                         charCounter += 3;
                     }
@@ -71,7 +74,8 @@ class ExpressionController {
                 if (charCounter < expression.length()) {
                     if (expression.charAt(charCounter) >= '0'
                             && expression.charAt(charCounter) <= '9'
-                            && (tmp[tmpCounter - 1].matches("[0-9]*") || tmp[tmpCounter - 1].matches("[0-9]*[.][0-9]*"))) {
+                            && (tmp[tmpCounter - 1].matches("[0-9]*")
+                                    || tmp[tmpCounter - 1].matches("[0-9]*[.][0-9]*"))) {
                         tmpCounter--;
                     } else if (expression.charAt(charCounter) == '.' && tmp[tmpCounter - 1].matches("[0-9]*")) {
                         tmpCounter--;
@@ -105,8 +109,8 @@ class ExpressionController {
         }
 
         for (int i = 0; i < expr.length; i++) {
-            if(expr[i].contains("log") || expr[i].contains("exp"))
-                operatorFunction(expr,i);
+            if (expr[i].contains("log") || expr[i].contains("exp"))
+                operatorFunction(expr, i);
         }
     }
 
@@ -118,20 +122,20 @@ class ExpressionController {
         }
 
         // evaluating log and exp
-        ArrayList<String> topLevelCheck = new ArrayList<String> (Arrays.asList(expression));
-        if(topLevelCheck.contains("log")) {
+        ArrayList<String> topLevelCheck = new ArrayList<String>(Arrays.asList(expression));
+        if (topLevelCheck.contains("log")) {
             int expIndex = topLevelCheck.indexOf("log");
             String result = "";
-            result = Double.toString(Math.log(Double.parseDouble(expression[expIndex+1])));
+            result = Double.toString(Math.log(Double.parseDouble(expression[expIndex + 1])));
             expression[expIndex] = result;
-            expression[expIndex+1] = "";
+            expression[expIndex + 1] = "";
         }
-        if(topLevelCheck.contains("exp")) {
+        if (topLevelCheck.contains("exp")) {
             int expIndex = topLevelCheck.indexOf("exp");
             String result = "";
-            result = Double.toString(Math.exp(Double.parseDouble(expression[expIndex+1])));
+            result = Double.toString(Math.exp(Double.parseDouble(expression[expIndex + 1])));
             expression[expIndex] = result;
-            expression[expIndex+1] = "";
+            expression[expIndex + 1] = "";
         }
 
         String operator = expression[index];
@@ -195,8 +199,8 @@ class ExpressionController {
 
     public static boolean validation(String text) {
 
-        if (text.matches("(.*)[^+-_*/](.*)[^0-9](.*)") || text.matches("[A-Za-z]")||
-                text.matches("(.*)[log(](.*)[)](.*)")||text.matches("(.*)[exp(](.*)[)](.*)")) {
+        if (text.matches("(.*)[^+-_*/](.*)[^0-9](.*)") || text.matches("[A-Za-z]") ||
+                text.matches("(.*)[log(](.*)[)](.*)") || text.matches("(.*)[exp(](.*)[)](.*)")) {
             return true;
         }
         return false;
