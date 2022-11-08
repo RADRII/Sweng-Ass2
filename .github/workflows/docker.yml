@@ -19,11 +19,18 @@ jobs:
       - name: Check Out Repo 
         uses: actions/checkout@v2
       
-      - name: Set up JDK 11
-        uses: actions/setup-java@v2
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
         with:
-          java-version: '11'
-          distribution: 'adopt'
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Make mvnw executable
+        run: cd inotes && cd webserver && chmod +x mvnw
+
+      - name: Build packages and install them
+        run: cd inotes && cd webserver && ./mvnw clean install -B --no-transfer-progress
 
       - name: Login to Docker Hub
         uses: docker/login-action@v1
@@ -35,12 +42,6 @@ jobs:
         uses: docker/setup-buildx-action@v1
         with:
           version: v0.7.0
-
-      - name: Make mvnw executable
-        run: cd inotes && cd webserver && chmod +x mvnw
-
-      - name: Build packages and install them
-        run: cd inotes && cd webserver && ./mvnw clean install -B --no-transfer-progress
           
       - name: Build and push
         id: docker_build
