@@ -1,10 +1,9 @@
 name: CD to Docker Hub
 
-# on:
-#   create:
-#     tags:
-#       - "v*.*.*"
-on: workflow_dispatch
+on:
+  create:
+    tags:
+      - "v*.*.*"
 
 jobs:
   build:
