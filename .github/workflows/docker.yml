@@ -34,8 +34,8 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v2
         with:
-          context: ./
-          file: ./inotes/webserver/Dockerfile
+          context: ./inotes/webserver/
+          file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/swengass2:latest
 
