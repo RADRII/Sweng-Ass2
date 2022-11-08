@@ -36,9 +36,9 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: ./
-          file: ./inotes/Dockerfile
+          file: ./inotes/webserver/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/swengass2:latest
 
       - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
+        run: echo ${{ steps.docker_build.outputs.digest }} 
